@@ -5,6 +5,7 @@ from movies.services import movie_cards
 
 from .forms import FeedbackForm
 from .models import Feedback, SentimentAnalysis
+from .services.sentiment import analyze_feedback
 from .tracking import generate_unique_tracking_id
 
 
@@ -13,7 +14,8 @@ def submit_feedback(request, slug):
 
     GET: renders the feedback form for a published movie.
     POST: validates the form, saves the feedback with a unique tracking ID,
-    creates a pending SentimentAnalysis row, and redirects to the success page.
+    creates a SentimentAnalysis record, runs sentiment analysis, and redirects
+    to the success page. Sentiment analysis failures never block submission.
     """
     movie = get_object_or_404(movie_cards().filter(is_published=True), slug=slug)
 
@@ -38,12 +40,14 @@ def submit_feedback(request, slug):
                     message=form.cleaned_data["message"],
                     tracking_id=generate_unique_tracking_id(),
                 )
-                # Create a pending analysis row so Module 3 can populate it.
-                # The feedback row is committed even if analysis later fails.
+                # Create a pending analysis row. Module 3 populates it below.
                 SentimentAnalysis.objects.create(
                     feedback=feedback,
                     status=SentimentAnalysis.Status.PENDING,
                 )
+                # Run sentiment analysis immediately. Any failure is caught
+                # inside analyze_feedback and does not roll back the feedback.
+                analyze_feedback(feedback)
 
             return redirect("feedback:success", tracking_id=feedback.tracking_id)
 

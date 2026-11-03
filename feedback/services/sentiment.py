@@ -77,7 +77,7 @@ def analyze_feedback(feedback):
     Returns:
         The updated SentimentAnalysis instance.
     """
-    from .models import SentimentAnalysis
+    from feedback.models import SentimentAnalysis
 
     analysis = getattr(feedback, "analysis", None)
     if analysis is None:
@@ -123,7 +123,7 @@ def retry_failed_analyses(limit=None):
     Returns:
         (processed, succeeded, failed) counts.
     """
-    from .models import SentimentAnalysis
+    from feedback.models import SentimentAnalysis
 
     queryset = SentimentAnalysis.objects.filter(
         status=SentimentAnalysis.Status.FAILED
