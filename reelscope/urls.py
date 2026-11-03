@@ -12,6 +12,7 @@ urlpatterns = [
     path("", home, name="home"),
     path("movies/", include("movies.urls")),
     path("staff/movies/", include("movies.staff_urls")),
+    path("feedback/", include("feedback.urls")),
     path("track/", track_feedback, name="track"),
     path("accounts/", include("accounts.urls")),
     path("staff/", include("analytics.urls")),
