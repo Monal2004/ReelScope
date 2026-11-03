@@ -1,8 +1,7 @@
+from django.contrib import messages
 from django.contrib.auth import views as auth_views
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.views.decorators.http import require_GET
-
-from .forms import RegisterForm
 
 
 class LoginView(auth_views.LoginView):
@@ -16,5 +15,14 @@ class LogoutView(auth_views.LogoutView):
 
 @require_GET
 def register(request):
-    """Registration page. The account-creation flow arrives in the backend phase."""
-    return render(request, "accounts/register.html", {"form": RegisterForm()})
+    """Public registration is disabled.
+
+    Staff accounts are created through Django's superuser/admin system.
+    Redirect visitors to the login page with an informative message.
+    """
+    messages.info(
+        request,
+        "Public registration is disabled. Staff accounts are created "
+        "by the administrator through Django Admin.",
+    )
+    return redirect("accounts:login")

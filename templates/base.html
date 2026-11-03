@@ -40,7 +40,6 @@
             </form>
           {% else %}
             <a class="btn btn-ghost btn-sm btn-block" href="{% url 'accounts:login' %}">Log in</a>
-            <a class="btn btn-gold btn-sm btn-block" href="{% url 'accounts:register' %}">Create account</a>
           {% endif %}
         </div>
       </nav>
@@ -91,7 +90,6 @@
         <h4>Explore</h4>
         <a href="{% url 'movies:list' %}">All movies</a>
         <a href="{% url 'track' %}">Track feedback</a>
-        <a href="{% url 'accounts:register' %}">Create account</a>
       </div>
       <div class="footer-col">
         <h4>Your account</h4>
@@ -103,7 +101,6 @@
           </form>
         {% else %}
           <a href="{% url 'accounts:login' %}">Log in</a>
-          <a href="{% url 'accounts:register' %}">Register</a>
           <a href="{% url 'track' %}">Find a submission</a>
         {% endif %}
       </div>

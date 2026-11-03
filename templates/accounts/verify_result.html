@@ -17,8 +17,8 @@
         <span class="state-mark" aria-hidden="true">!</span>
         <p class="eyebrow">Link expired</p>
         <h1>This verification link has <span class="accent-word">expired</span>.</h1>
-        <p class="success-lead">Verification links stay valid for 24 hours. Register again or request a new link.</p>
-        <a class="btn btn-gold" href="{% url 'accounts:register' %}">Back to registration</a>
+        <p class="success-lead">Public registration is disabled. Contact the project administrator for a staff account.</p>
+        <a class="btn btn-gold" href="{% url 'accounts:login' %}">Log in</a>
       {% elif status == "used" %}
         <span class="state-mark" aria-hidden="true">i</span>
         <p class="eyebrow">Already verified</p>
@@ -29,8 +29,8 @@
         <span class="state-mark" aria-hidden="true">?</span>
         <p class="eyebrow">Invalid link</p>
         <h1>We could not verify this link.</h1>
-        <p class="success-lead">The link may be incomplete or no longer valid. Register again to receive a fresh one.</p>
-        <a class="btn btn-ghost" href="{% url 'accounts:register' %}">Register</a>
+        <p class="success-lead">The link may be incomplete or no longer valid. Contact the project administrator for a staff account.</p>
+        <a class="btn btn-ghost" href="{% url 'accounts:login' %}">Log in</a>
       {% endif %}
     </div>
   </div>

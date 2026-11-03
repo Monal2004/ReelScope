@@ -32,6 +32,10 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
             Dashboard
           </a>
+          <a class="staff-nav-link{% if request.resolver_match.url_name == 'movie_list_staff' or request.resolver_match.url_name == 'movie_add' or request.resolver_match.url_name == 'movie_edit' %} is-active{% endif %}" href="{% url 'movies_staff:movie_list_staff' %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="4.5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19.5" cy="12" r="1.2"/></svg>
+            Manage Movies
+          </a>
         </div>
 
         <div class="staff-nav-group">
