@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Feedback received — ReelScope{% endblock %}
+{% block body_class %}page-success{% endblock %}
+
+{% block content %}
+<section class="section success-section">
+  <div class="shell shell-small">
+    <div class="panel success-panel">
+      <span class="success-mark" aria-hidden="true">✓</span>
+      <p class="eyebrow">Feedback received</p>
+      <h1>Your voice is <span class="accent-word">in the room</span>.</h1>
+      <p class="success-lead">
+        Thank you for rating <strong>{{ feedback.movie.title }}</strong>. Your
+        submission and its sentiment analysis are now part of the audience picture.
+      </p>
+
+      <div class="tracking-card">
+        <span class="tracking-label">Your Tracking ID</span>
+        <div class="tracking-value-row">
+          <code class="tracking-value" data-copy-value>{{ feedback.tracking_id }}</code>
+          <button type="button" class="btn btn-ghost btn-sm" data-copy-button>Copy</button>
+        </div>
+        <p class="hint">
+          {% if feedback.email_sent_at %}
+            A copy has been emailed to you. Keep this ID to revisit your feedback.
+          {% else %}
+            We could not confirm the email was delivered. Save this ID to revisit your feedback.
+          {% endif %}
+        </p>
+      </div>
+
+      <dl class="success-summary">
+        <div><dt>Movie</dt><dd>{{ feedback.movie.title }}</dd></div>
+        <div><dt>Star rating</dt><dd>{{ feedback.rating }} / 5</dd></div>
+        <div><dt>Sentiment</dt><dd>{% include "partials/sentiment_badge.html" with analysis=feedback.analysis %}</dd></div>
+      </dl>
+
+      <div class="success-actions">
+        <a class="btn btn-gold" href="{% url 'track' %}">Track this submission</a>
+        <a class="btn btn-outline" href="{{ feedback.movie.get_absolute_url }}">Back to the movie</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

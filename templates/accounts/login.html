@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Log in — ReelScope{% endblock %}
+{% block body_class %}page-auth{% endblock %}
+
+{% block content %}
+<section class="auth-section">
+  <div class="shell auth-shell">
+    <aside class="auth-visual" aria-hidden="true">
+      <div class="auth-visual-glow"></div>
+      <p class="eyebrow">Welcome back</p>
+      <blockquote>
+        &ldquo;A film is never really finished until an audience has answered it.&rdquo;
+      </blockquote>
+      <p class="auth-visual-note">ReelScope keeps every answer in one clear picture.</p>
+      <div class="auth-visual-mark">
+        <img src="{% static 'images/logo.svg' %}" alt="">
+        <span>REEL<br>SCOPE</span>
+      </div>
+    </aside>
+
+    <div class="auth-card">
+      <p class="eyebrow">Account access</p>
+      <h1>Log in</h1>
+      <p class="auth-sub">Staff can reach the analytics dashboard from here.</p>
+
+      <form method="post" action="{% url 'accounts:login' %}" class="stack-form" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+          <div class="form-alert" role="alert">
+            {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+          </div>
+        {% endif %}
+
+        <div class="field">
+          <label class="field-label" for="{{ form.username.id_for_label }}">Username</label>
+          {{ form.username }}
+          {{ form.username.errors }}
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="{{ form.password.id_for_label }}">Password</label>
+          {{ form.password }}
+          {{ form.password.errors }}
+        </div>
+
+        {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+
+        <button type="submit" class="btn btn-gold btn-block">Log in</button>
+      </form>
+
+      <p class="auth-alt">New here? <a href="{% url 'accounts:register' %}">Create an account</a></p>
+      <p class="auth-alt muted">Only verified accounts can sign in.</p>
+    </div>
+  </div>
+</section>
+{% endblock %}

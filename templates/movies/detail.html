@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ movie.title }} — ReelScope{% endblock %}
+{% block meta_description %}{{ movie.description|truncatewords:24 }} Share your rating and see what audiences think.{% endblock %}
+{% block body_class %}page-detail{% endblock %}
+
+{% block content %}
+<section class="detail-hero">
+  <div class="detail-backdrop" style="background-image:url('{{ movie.poster.url }}')" aria-hidden="true"></div>
+  <div class="detail-fade" aria-hidden="true"></div>
+
+  <div class="shell detail-hero-inner">
+    <a class="back-link" href="{% url 'movies:list' %}">&larr; All movies</a>
+
+    <div class="detail-grid">
+      <div class="detail-poster">
+        <img src="{{ movie.poster.url }}" alt="Poster for {{ movie.title }}">
+      </div>
+
+      <div class="detail-info">
+        <div class="detail-tags">
+          <span class="tag tag-gold">{{ movie.get_genre_display }}</span>
+          <span class="tag">{{ movie.release_date|date:"Y" }}</span>
+          <span class="tag">{{ movie.language }}</span>
+        </div>
+        <h1>{{ movie.title }}</h1>
+        <p class="detail-crew">
+          Directed by <strong>{{ movie.director }}</strong>
+        </p>
+
+        <div class="detail-score">
+          <div class="score-big">
+            {% if movie.average_rating %}{{ movie.average_rating|floatformat:1 }}{% else %}&mdash;{% endif %}
+            <span>/5</span>
+          </div>
+          <div class="score-meta">
+            <span class="star-row" aria-hidden="true">
+              {% for i in "12345" %}
+                <span class="{% if movie.average_rating and movie.average_rating >= forloop.counter %}is-filled{% endif %}">★</span>
+              {% endfor %}
+            </span>
+            <span>{{ movie.feedback_count }} review{{ movie.feedback_count|pluralize }}</span>
+          </div>
+        </div>
+
+        <div class="detail-actions">
+          <a class="btn btn-gold" href="{% url 'movies:feedback' movie.slug %}">Rate this movie</a>
+          <a class="btn btn-outline" href="#audience">Read audience notes</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="audience">
+  <div class="shell detail-body">
+    <div class="detail-main">
+      <div class="panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Audience pulse</p>
+            <h2>How the room feels</h2>
+          </div>
+          <span class="review-count">{{ sentiment.total }} analysed review{{ sentiment.total|pluralize }}</span>
+        </div>
+
+        {% if sentiment.total %}
+          <div class="sentiment-meter" role="img" aria-label="Positive {{ sentiment.percentages.positive }} percent, neutral {{ sentiment.percentages.neutral }} percent, negative {{ sentiment.percentages.negative }} percent">
+            {% if sentiment.percentages.positive %}<span class="meter-seg is-positive" style="width:{{ sentiment.percentages.positive }}%"></span>{% endif %}
+            {% if sentiment.percentages.neutral %}<span class="meter-seg is-neutral" style="width:{{ sentiment.percentages.neutral }}%"></span>{% endif %}
+            {% if sentiment.percentages.negative %}<span class="meter-seg is-negative" style="width:{{ sentiment.percentages.negative }}%"></span>{% endif %}
+          </div>
+          <div class="sentiment-legend">
+            <span><i class="dot is-positive"></i>Positive <strong>{{ sentiment.counts.positive }}</strong></span>
+            <span><i class="dot is-neutral"></i>Neutral <strong>{{ sentiment.counts.neutral }}</strong></span>
+            <span><i class="dot is-negative"></i>Negative <strong>{{ sentiment.counts.negative }}</strong></span>
+          </div>
+
+          <div class="aspect-columns">
+            <div>
+              <h3 class="aspect-title">What audiences praise</h3>
+              {% if aspects.positive %}
+                <div class="tag-list">
+                  {% for name, count in aspects.positive %}
+                    <span class="aspect-chip is-positive">{{ name }} <em>{{ count }}</em></span>
+                  {% endfor %}
+                </div>
+              {% else %}
+                <p class="muted">No recurring praise has been detected yet.</p>
+              {% endif %}
+            </div>
+            <div>
+              <h3 class="aspect-title">What audiences complain about</h3>
+              {% if aspects.negative %}
+                <div class="tag-list">
+                  {% for name, count in aspects.negative %}
+                    <span class="aspect-chip is-negative">{{ name }} <em>{{ count }}</em></span>
+                  {% endfor %}
+                </div>
+              {% else %}
+                <p class="muted">No recurring complaints have been detected yet.</p>
+              {% endif %}
+            </div>
+          </div>
+        {% else %}
+          <p class="muted">No analysed reviews yet. The first rating will light this up.</p>
+        {% endif %}
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Recent notes</p>
+            <h2>What people are saying</h2>
+          </div>
+          <span class="review-count">{{ feedback_total }} total</span>
+        </div>
+
+        {% if recent_feedback %}
+          <div class="feedback-list">
+            {% for item in recent_feedback %}
+              <article class="feedback-item">
+                <header class="feedback-head">
+                  <div class="feedback-author">
+                    <span class="avatar" aria-hidden="true">{{ item.username|first|upper }}</span>
+                    <div>
+                      <strong>{{ item.username }}</strong>
+                      <span class="feedback-date">{{ item.created_at|date:"M j, Y" }}</span>
+                    </div>
+                  </div>
+                  <div class="feedback-badges">
+                    <span class="stars-inline" aria-label="{{ item.rating }} out of 5">
+                      {% for i in "12345" %}<span class="{% if forloop.counter <= item.rating %}is-filled{% endif %}">★</span>{% endfor %}
+                    </span>
+                    {% include "partials/sentiment_badge.html" with analysis=item.analysis %}
+                  </div>
+                </header>
+                <p class="feedback-message">{{ item.message }}</p>
+                {% if item.analysis.positive_aspects or item.analysis.negative_aspects %}
+                  <div class="tag-list tag-list-tight">
+                    {% for aspect in item.analysis.positive_aspects %}
+                      <span class="aspect-chip is-positive">{{ aspect }}</span>
+                    {% endfor %}
+                    {% for aspect in item.analysis.negative_aspects %}
+                      <span class="aspect-chip is-negative">{{ aspect }}</span>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+              </article>
+            {% endfor %}
+          </div>
+          {% if feedback_total > recent_feedback|length %}
+            <p class="panel-footnote">Showing the {{ recent_feedback|length }} most recent reviews. Emails are never displayed.</p>
+          {% endif %}
+        {% else %}
+          <div class="empty-inline">
+            <p>No reviews yet — your take could be the first.</p>
+            <a class="btn btn-ghost btn-sm" href="{% url 'movies:feedback' movie.slug %}">Write the first review</a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <aside class="detail-aside">
+      <div class="panel panel-soft">
+        <h2 class="aside-title">Film facts</h2>
+        <dl class="facts">
+          <div><dt>Release date</dt><dd>{{ movie.release_date|date:"F j, Y" }}</dd></div>
+          <div><dt>Director</dt><dd>{{ movie.director }}</dd></div>
+          <div><dt>Language</dt><dd>{{ movie.language }}</dd></div>
+          <div><dt>Genre</dt><dd>{{ movie.get_genre_display }}</dd></div>
+          <div><dt>Cast</dt><dd>{{ movie.cast }}</dd></div>
+        </dl>
+      </div>
+
+      <div class="panel cta-panel">
+        <p class="eyebrow">Your turn</p>
+        <h2>Did it work for you?</h2>
+        <p>Give {{ movie.title }} a star rating and tell us what stayed with you.</p>
+        <a class="btn btn-gold btn-block" href="{% url 'movies:feedback' movie.slug %}">Share your feedback</a>
+        <p class="hint">No account needed. You get a Tracking ID by email.</p>
+      </div>
+
+      <div class="panel">
+        <h2 class="aside-title">About the story</h2>
+        <p class="about-text">{{ movie.description }}</p>
+      </div>
+    </aside>
+  </div>
+</section>
+{% endblock %}

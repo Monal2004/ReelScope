@@ -1,0 +1,90 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Staff dashboard — ReelScope{% endblock %}</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/svg+xml" href="{% static 'images/logo.svg' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <script src="{% static 'js/main.js' %}" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js" defer></script>
+  <script src="{% static 'js/charts.js' %}" defer></script>
+  {% block head %}{% endblock %}
+</head>
+<body class="staff-body">
+  <div class="staff-layout">
+    <aside class="staff-sidebar" id="staff-sidebar" data-staff-sidebar>
+      <a class="brand staff-brand" href="{% url 'analytics:dashboard' %}">
+        <img class="brand-logo" src="{% static 'images/logo.svg' %}" alt="" width="32" height="32">
+        <span class="brand-word">REEL<span>SCOPE</span></span>
+        <span class="staff-badge">Staff</span>
+      </a>
+
+      <nav class="staff-nav" aria-label="Staff navigation">
+        <div class="staff-nav-group">
+          <span class="staff-nav-label">Overview</span>
+          <a class="staff-nav-link{% if request.resolver_match.url_name == 'dashboard' %} is-active{% endif %}" href="{% url 'analytics:dashboard' %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+            Dashboard
+          </a>
+        </div>
+
+        <div class="staff-nav-group">
+          <span class="staff-nav-label">Site</span>
+          <a class="staff-nav-link" href="{% url 'home' %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg>
+            Public site
+          </a>
+          <a class="staff-nav-link" href="{% url 'track' %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
+            Track lookup
+          </a>
+          <a class="staff-nav-link" href="/django-admin/">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 5.5h16v13H4z"/><path d="M4 10h16M9 10v8.5"/></svg>
+            Django admin
+          </a>
+        </div>
+      </nav>
+
+      <div class="staff-sidebar-foot">
+        <div class="staff-user">
+          <span class="avatar" aria-hidden="true">{{ user.username|first|upper }}</span>
+          <div>
+            <strong>{{ user.username }}</strong>
+            <span>Administrator</span>
+          </div>
+        </div>
+        <form method="post" action="{% url 'accounts:logout' %}">
+          {% csrf_token %}
+          <button type="submit" class="staff-logout">Log out</button>
+        </form>
+      </div>
+    </aside>
+
+    <div class="staff-content">
+      <header class="staff-topbar">
+        <button class="staff-menu-toggle" type="button" data-staff-toggle aria-controls="staff-sidebar" aria-expanded="false" aria-label="Open staff menu">
+          <span></span><span></span><span></span>
+        </button>
+        <span class="staff-topbar-title">{% block staff_title %}Dashboard{% endblock %}</span>
+        <div class="staff-topbar-actions">
+          <span class="live-badge"><span class="live-dot"></span>Live data</span>
+          <a class="btn btn-ghost btn-sm" href="{% url 'home' %}">View site</a>
+        </div>
+      </header>
+
+      <main class="staff-main">
+        {% block staff_content %}{% endblock %}
+      </main>
+    </div>
+  </div>
+
+  <div class="staff-scrim" data-staff-scrim hidden></div>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

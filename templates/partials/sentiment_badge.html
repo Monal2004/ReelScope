@@ -1,0 +1,11 @@
+{% if analysis.status == "failed" %}
+  <span class="badge badge-failed">Analysis failed</span>
+{% elif analysis.status == "pending" %}
+  <span class="badge badge-pending">Analysis pending</span>
+{% elif analysis.text_sentiment == "positive" %}
+  <span class="badge badge-positive">Positive</span>
+{% elif analysis.text_sentiment == "negative" %}
+  <span class="badge badge-negative">Negative</span>
+{% else %}
+  <span class="badge badge-neutral">Neutral</span>
+{% endif %}

@@ -1,0 +1,26 @@
+{% load static %}
+<article class="movie-card">
+  <a class="movie-card-poster" href="{{ movie.get_absolute_url }}" aria-label="{{ movie.title }} — view details">
+    {% if movie.poster %}
+      <img src="{{ movie.poster.url }}" alt="Poster for {{ movie.title }}" loading="lazy">
+    {% else %}
+      <img src="{% static 'images/poster-placeholder.svg' %}" alt="No poster available for {{ movie.title }}" loading="lazy">
+    {% endif %}
+    <span class="movie-card-genre">{{ movie.get_genre_display }}</span>
+    {% if movie.average_rating %}
+      <span class="movie-card-score">★ {{ movie.average_rating|floatformat:1 }}</span>
+    {% endif %}
+    <span class="movie-card-overlay">
+      <span class="movie-card-cta">View &amp; rate</span>
+    </span>
+  </a>
+  <div class="movie-card-body">
+    <h3><a href="{{ movie.get_absolute_url }}">{{ movie.title }}</a></h3>
+    <p class="movie-card-meta">{{ movie.release_date|date:"Y" }} · {{ movie.language }}</p>
+    {% if movie.feedback_count %}
+      <p class="movie-card-count">{{ movie.feedback_count }} review{{ movie.feedback_count|pluralize }}</p>
+    {% else %}
+      <p class="movie-card-count is-muted">Be the first to rate</p>
+    {% endif %}
+  </div>
+</article>

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Create an account — ReelScope{% endblock %}
+{% block body_class %}page-auth{% endblock %}
+
+{% block content %}
+<section class="auth-section">
+  <div class="shell auth-shell">
+    <aside class="auth-visual" aria-hidden="true">
+      <div class="auth-visual-glow"></div>
+      <p class="eyebrow">Join ReelScope</p>
+      <blockquote>
+        &ldquo;Every rating is a sentence. Every sentence is a signal.&rdquo;
+      </blockquote>
+      <ul class="auth-points">
+        <li>Verified accounts only</li>
+        <li>No feedback linked to your profile</li>
+        <li>Anonymous reviews stay anonymous</li>
+      </ul>
+      <div class="auth-visual-mark">
+        <img src="{% static 'images/logo.svg' %}" alt="">
+        <span>REEL<br>SCOPE</span>
+      </div>
+    </aside>
+
+    <div class="auth-card">
+      <p class="eyebrow">Registration</p>
+      <h1>Create an account</h1>
+      <p class="auth-sub">We send a verification link before your account becomes active.</p>
+
+      <form method="post" action="" class="stack-form" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+          <div class="form-alert" role="alert">
+            {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+          </div>
+        {% endif %}
+
+        {% for field in form %}
+          <div class="field">
+            <label class="field-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}<span class="field-hint">{{ field.help_text|safe }}</span>{% endif %}
+            {{ field.errors }}
+          </div>
+        {% endfor %}
+
+        <button type="submit" class="btn btn-gold btn-block">Create account</button>
+      </form>
+
+      <p class="auth-alt">Already registered? <a href="{% url 'accounts:login' %}">Log in</a></p>
+      <p class="auth-alt muted">Submitting movie feedback never requires an account.</p>
+    </div>
+  </div>
+</section>
+{% endblock %}

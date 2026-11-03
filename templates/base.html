@@ -1,0 +1,126 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}ReelScope — Audience intelligence for every movie{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}ReelScope turns movie feedback into clear audience insight: star ratings, written opinions and automatic sentiment analysis.{% endblock %}">
+  <meta name="theme-color" content="#06080f">
+  <link rel="icon" type="image/svg+xml" href="{% static 'images/logo.svg' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <script src="{% static 'js/main.js' %}" defer></script>
+  {% block head %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header" data-header>
+    <div class="shell header-inner">
+      <a class="brand" href="{% url 'home' %}" aria-label="ReelScope home">
+        <img class="brand-logo" src="{% static 'images/logo.svg' %}" alt="" width="34" height="34">
+        <span class="brand-word">REEL<span>SCOPE</span></span>
+      </a>
+
+      <nav class="site-nav" id="site-nav" data-nav aria-label="Main navigation">
+        <a class="nav-link{% if request.resolver_match.url_name == 'home' %} is-active{% endif %}" href="{% url 'home' %}">Home</a>
+        <a class="nav-link{% if request.resolver_match.app_name == 'movies' %} is-active{% endif %}" href="{% url 'movies:list' %}">Movies</a>
+        <a class="nav-link{% if request.resolver_match.url_name == 'track' %} is-active{% endif %}" href="{% url 'track' %}">Track feedback</a>
+        {% if user.is_staff %}
+          <a class="nav-link{% if request.resolver_match.app_name == 'analytics' %} is-active{% endif %}" href="{% url 'analytics:dashboard' %}">Dashboard</a>
+        {% endif %}
+        <div class="site-nav-mobile">
+          {% if user.is_authenticated %}
+            <span class="user-chip"><span class="user-dot"></span>{{ user.username }}</span>
+            <form method="post" action="{% url 'accounts:logout' %}">
+              {% csrf_token %}<button type="submit" class="btn btn-ghost btn-sm btn-block">Log out</button>
+            </form>
+          {% else %}
+            <a class="btn btn-ghost btn-sm btn-block" href="{% url 'accounts:login' %}">Log in</a>
+            <a class="btn btn-gold btn-sm btn-block" href="{% url 'accounts:register' %}">Create account</a>
+          {% endif %}
+        </div>
+      </nav>
+
+      <div class="header-actions">
+        {% if user.is_authenticated %}
+          <span class="user-chip"><span class="user-dot"></span>{{ user.username }}</span>
+          <form class="inline-form" method="post" action="{% url 'accounts:logout' %}">
+            {% csrf_token %}<button type="submit" class="btn btn-ghost btn-sm">Log out</button>
+          </form>
+        {% else %}
+          <a class="nav-link nav-link-login" href="{% url 'accounts:login' %}">Log in</a>
+          <a class="btn btn-gold btn-sm" href="{% url 'movies:list' %}">Explore</a>
+        {% endif %}
+        <button class="nav-toggle" type="button" data-nav-toggle aria-controls="site-nav" aria-expanded="false" aria-label="Open menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  {% if messages %}
+    <div class="toast-stack" role="status" aria-live="polite">
+      {% for message in messages %}
+        <div class="toast toast-{{ message.tags|default:'info' }}" data-toast>
+          <span>{{ message }}</span>
+          <button type="button" class="toast-close" data-toast-close aria-label="Dismiss">&times;</button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <main id="main" class="{% block main_class %}{% endblock %}">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell footer-grid">
+      <div class="footer-brand">
+        <a class="brand" href="{% url 'home' %}">
+          <img class="brand-logo" src="{% static 'images/logo.svg' %}" alt="" width="30" height="30">
+          <span class="brand-word">REEL<span>SCOPE</span></span>
+        </a>
+        <p>Movie feedback, decoded. Every rating and review becomes a clear signal for the people who make and show films.</p>
+        <p class="footer-note">Sentiment analysis is an estimate, not a verdict.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Explore</h4>
+        <a href="{% url 'movies:list' %}">All movies</a>
+        <a href="{% url 'track' %}">Track feedback</a>
+        <a href="{% url 'accounts:register' %}">Create account</a>
+      </div>
+      <div class="footer-col">
+        <h4>Your account</h4>
+        {% if user.is_authenticated %}
+          <a href="{% url 'home' %}">Home</a>
+          {% if user.is_staff %}<a href="{% url 'analytics:dashboard' %}">Staff dashboard</a>{% endif %}
+          <form method="post" action="{% url 'accounts:logout' %}">
+            {% csrf_token %}<button type="submit" class="footer-link-button">Log out</button>
+          </form>
+        {% else %}
+          <a href="{% url 'accounts:login' %}">Log in</a>
+          <a href="{% url 'accounts:register' %}">Register</a>
+          <a href="{% url 'track' %}">Find a submission</a>
+        {% endif %}
+      </div>
+      <div class="footer-col">
+        <h4>Built with</h4>
+        <span>Django &amp; SQLite</span>
+        <span>VADER sentiment analysis</span>
+        <span>Chart.js &amp; vanilla JS</span>
+        <span>HTML5 &amp; CSS3</span>
+      </div>
+    </div>
+    <div class="shell footer-bottom">
+      <p>&copy; {% now "Y" %} ReelScope. A full-stack demonstration project.</p>
+      <p>No emails are ever shown publicly.</p>
+    </div>
+  </footer>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>

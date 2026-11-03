@@ -1,14 +1,19 @@
-"""Root URL configuration for ReelScope.
-
-App URL modules are added as their pages are built in later phases.
-"""
+"""Root URL configuration for ReelScope."""
 
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import path
+from django.urls import include, path
+
+from feedback.views import track_feedback
+from movies.views import home
 
 urlpatterns = [
+    path("", home, name="home"),
+    path("movies/", include("movies.urls")),
+    path("track/", track_feedback, name="track"),
+    path("accounts/", include("accounts.urls")),
+    path("staff/", include("analytics.urls")),
     path("django-admin/", admin.site.urls),
 ]
 

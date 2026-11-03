@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Track your feedback — ReelScope{% endblock %}
+{% block meta_description %}Look up your ReelScope feedback with the Tracking ID sent to your email.{% endblock %}
+{% block body_class %}page-track{% endblock %}
+
+{% block content %}
+<section class="page-header page-header-centered">
+  <div class="shell shell-narrow">
+    <p class="eyebrow">Track feedback</p>
+    <h1>Your receipt, <span class="accent-word">your record</span>.</h1>
+    <p class="page-lead">
+      Enter the Tracking ID from your confirmation email to revisit your rating
+      and see what the sentiment analysis found.
+    </p>
+  </div>
+</section>
+
+<section class="section section-tight">
+  <div class="shell shell-narrow">
+    <div class="panel track-panel">
+      <form method="post" action="" class="track-form" novalidate>
+        {% csrf_token %}
+        <label class="field-label" for="tracking-id">Tracking ID</label>
+        <div class="track-input-row">
+          <input id="tracking-id" type="text" name="tracking_id" placeholder="RS-2026-A8K92"
+                 maxlength="16" autocomplete="off" spellcheck="false"
+                 autocapitalize="characters" aria-describedby="tracking-help" required>
+          <button type="submit" class="btn btn-gold">Look up</button>
+        </div>
+        <p class="field-hint" id="tracking-help">The ID looks like <code>RS-2026-A8K92</code> and is in your confirmation email.</p>
+      </form>
+
+      {% if error %}
+        <div class="form-alert" role="alert">{{ error }}</div>
+      {% endif %}
+
+      {% if feedback %}
+        <article class="track-result">
+          <header class="track-result-head">
+            <div>
+              <span class="eyebrow">Submission found</span>
+              <h2>{{ feedback.movie.title }}</h2>
+              <p class="track-code">{{ feedback.tracking_id }}</p>
+            </div>
+            {% include "partials/sentiment_badge.html" with analysis=feedback.analysis %}
+          </header>
+
+          <dl class="result-grid">
+            <div><dt>Name</dt><dd>{{ feedback.username }}</dd></div>
+            <div><dt>Submitted</dt><dd>{{ feedback.created_at|date:"F j, Y · H:i" }}</dd></div>
+            <div><dt>Your rating</dt><dd><span class="stars-inline" aria-label="{{ feedback.rating }} out of 5">{% for i in "12345" %}<span class="{% if forloop.counter <= feedback.rating %}is-filled{% endif %}">★</span>{% endfor %}</span> {{ feedback.rating }}/5</dd></div>
+            <div><dt>Status</dt><dd>{{ feedback.analysis.get_status_display|default:"Pending" }}</dd></div>
+          </dl>
+
+          <div class="result-message">
+            <h3>Your feedback</h3>
+            <p>{{ feedback.message }}</p>
+          </div>
+
+          {% if feedback.analysis.status == "success" %}
+            <div class="result-analysis">
+              <div>
+                <h3>Positive aspects</h3>
+                {% if feedback.analysis.positive_aspects %}
+                  <div class="tag-list">
+                    {% for aspect in feedback.analysis.positive_aspects %}<span class="aspect-chip is-positive">{{ aspect }}</span>{% endfor %}
+                  </div>
+                {% else %}
+                  <p class="muted">None detected.</p>
+                {% endif %}
+              </div>
+              <div>
+                <h3>Negative aspects</h3>
+                {% if feedback.analysis.negative_aspects %}
+                  <div class="tag-list">
+                    {% for aspect in feedback.analysis.negative_aspects %}<span class="aspect-chip is-negative">{{ aspect }}</span>{% endfor %}
+                  </div>
+                {% else %}
+                  <p class="muted">None detected.</p>
+                {% endif %}
+              </div>
+            </div>
+          {% elif feedback.analysis.status == "failed" %}
+            <p class="muted">The sentiment analysis could not be completed for this submission.</p>
+          {% else %}
+            <p class="muted">Sentiment analysis is still pending for this submission.</p>
+          {% endif %}
+
+          <footer class="track-result-foot">
+            <a class="text-link" href="{{ feedback.movie.get_absolute_url }}">Back to {{ feedback.movie.title }} <span aria-hidden="true">&rarr;</span></a>
+            <span class="hint">Your email is never shown on this page.</span>
+          </footer>
+        </article>
+      {% endif %}
+    </div>
+
+    <div class="track-help-grid">
+      <div class="panel panel-soft">
+        <h2 class="aside-title">Where is my ID?</h2>
+        <p>It is in the confirmation email titled &ldquo;Your ReelScope feedback receipt&rdquo;. The email also names the film you reviewed.</p>
+      </div>
+      <div class="panel panel-soft">
+        <h2 class="aside-title">Lost the email?</h2>
+        <p>For privacy, IDs cannot be recovered by email address. You can always submit fresh feedback for the same movie.</p>
+      </div>
+      <div class="panel panel-soft">
+        <h2 class="aside-title">Private by design</h2>
+        <p>Only your ID unlocks your submission. Emails are never displayed, and IDs cannot be guessed by browsing.</p>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

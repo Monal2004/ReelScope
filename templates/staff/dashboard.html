@@ -1,0 +1,197 @@
+{% extends "staff/base_staff.html" %}
+
+{% block title %}Audience overview — ReelScope Staff{% endblock %}
+{% block staff_title %}Audience overview{% endblock %}
+
+{% block staff_content %}
+<div class="staff-page-head">
+  <div>
+    <p class="eyebrow">Dashboard</p>
+    <h1>What audiences are telling you.</h1>
+    <p class="staff-lead">Live totals, sentiment and theme analysis across the whole catalogue.</p>
+  </div>
+  <div class="staff-page-meta">
+    <span class="meta-chip">{{ today|date:"F j, Y" }}</span>
+    <a class="btn btn-gold btn-sm" href="{% url 'movies:list' %}">Browse catalogue</a>
+  </div>
+</div>
+
+<div class="kpi-grid">
+  <article class="kpi-card">
+    <span class="kpi-label">Movies</span>
+    <strong class="kpi-value">{{ total_movies }}</strong>
+    <span class="kpi-foot">In the catalogue</span>
+  </article>
+  <article class="kpi-card">
+    <span class="kpi-label">Feedback</span>
+    <strong class="kpi-value">{{ total_feedback }}</strong>
+    <span class="kpi-foot">Submissions received</span>
+  </article>
+  <article class="kpi-card">
+    <span class="kpi-label">Average rating</span>
+    <strong class="kpi-value">{% if total_feedback %}{{ average_rating }}{% else %}&mdash;{% endif %}<span class="kpi-unit">{% if total_feedback %}/5{% endif %}</span></strong>
+    <span class="kpi-foot">Across all star ratings</span>
+  </article>
+  <article class="kpi-card is-positive">
+    <span class="kpi-label">Positive</span>
+    <strong class="kpi-value" data-sentiment-count="positive">{{ sentiment.counts.positive }}</strong>
+    <span class="kpi-foot"><span data-sentiment-percent="positive">{{ sentiment.percentages.positive }}</span>% of analysed feedback</span>
+  </article>
+  <article class="kpi-card is-neutral">
+    <span class="kpi-label">Neutral</span>
+    <strong class="kpi-value" data-sentiment-count="neutral">{{ sentiment.counts.neutral }}</strong>
+    <span class="kpi-foot"><span data-sentiment-percent="neutral">{{ sentiment.percentages.neutral }}</span>% of analysed feedback</span>
+  </article>
+  <article class="kpi-card is-negative">
+    <span class="kpi-label">Negative</span>
+    <strong class="kpi-value" data-sentiment-count="negative">{{ sentiment.counts.negative }}</strong>
+    <span class="kpi-foot"><span data-sentiment-percent="negative">{{ sentiment.percentages.negative }}</span>% of analysed feedback</span>
+  </article>
+</div>
+
+{% if mismatch_count %}
+  <p class="data-note">
+    <span class="note-dot" aria-hidden="true"></span>
+    {{ mismatch_count }} submission{{ mismatch_count|pluralize }} where star rating and written sentiment disagree.
+    Both values are stored, not overwritten.
+  </p>
+{% endif %}
+
+<div class="chart-grid" id="dashboard-charts"
+     data-summary-url="{% url 'analytics:chart_summary' %}"
+     data-ratings-url="{% url 'analytics:chart_ratings' %}"
+     data-sentiment-url="{% url 'analytics:chart_sentiment' %}"
+     data-trends-url="{% url 'analytics:chart_trends' %}">
+  <section class="chart-card chart-card-line">
+    <div class="chart-head">
+      <div>
+        <h2>Feedback trend</h2>
+        <p>Daily volume with positive and negative lines, last 30 days.</p>
+      </div>
+      <span class="chart-tag">30 days</span>
+    </div>
+    <div class="chart-holder">
+      <canvas id="trendLine" aria-label="Feedback trend over the last 30 days" role="img"></canvas>
+      <p class="chart-empty" data-chart-empty="trendLine" hidden>No feedback in this period yet.</p>
+    </div>
+  </section>
+
+  <section class="chart-card">
+    <div class="chart-head">
+      <div>
+        <h2>Sentiment split</h2>
+        <p>Analysed written feedback.</p>
+      </div>
+    </div>
+    <div class="chart-holder chart-holder-doughnut">
+      <canvas id="sentimentPie" aria-label="Sentiment distribution" role="img"></canvas>
+      <p class="chart-empty" data-chart-empty="sentimentPie" hidden>No analysed feedback yet.</p>
+    </div>
+    <div class="chart-legend">
+      <span><i class="dot is-positive"></i>Positive <strong data-sentiment-percent="positive">{{ sentiment.percentages.positive }}%</strong></span>
+      <span><i class="dot is-neutral"></i>Neutral <strong data-sentiment-percent="neutral">{{ sentiment.percentages.neutral }}%</strong></span>
+      <span><i class="dot is-negative"></i>Negative <strong data-sentiment-percent="negative">{{ sentiment.percentages.negative }}%</strong></span>
+    </div>
+  </section>
+
+  <section class="chart-card">
+    <div class="chart-head">
+      <div>
+        <h2>Movie ratings</h2>
+        <p>Average star rating per movie.</p>
+      </div>
+    </div>
+    <div class="chart-holder">
+      <canvas id="ratingsBar" aria-label="Average rating by movie" role="img"></canvas>
+      <p class="chart-empty" data-chart-empty="ratingsBar" hidden>No ratings yet.</p>
+    </div>
+  </section>
+
+  <section class="chart-card">
+    <div class="chart-head">
+      <div>
+        <h2>Praise vs complaints</h2>
+        <p>Positive and negative feedback per movie.</p>
+      </div>
+    </div>
+    <div class="chart-holder">
+      <canvas id="polarityBar" aria-label="Positive and negative feedback counts by movie" role="img"></canvas>
+      <p class="chart-empty" data-chart-empty="polarityBar" hidden>No analysed feedback yet.</p>
+    </div>
+  </section>
+</div>
+
+<div class="dashboard-lower">
+  <section class="staff-panel recent-panel">
+    <div class="staff-panel-head">
+      <div>
+        <h2>Latest submissions</h2>
+        <p>The eight most recent responses, newest first.</p>
+      </div>
+      <span class="meta-chip">{{ total_feedback }} total</span>
+    </div>
+
+    {% if recent_feedback %}
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th scope="col">Tracking ID</th>
+              <th scope="col">Movie</th>
+              <th scope="col">Audience</th>
+              <th scope="col">Rating</th>
+              <th scope="col">Sentiment</th>
+              <th scope="col">Received</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in recent_feedback %}
+              <tr>
+                <td><span class="code-chip">{{ item.tracking_id }}</span></td>
+                <td class="cell-title">{{ item.movie.title }}</td>
+                <td class="cell-muted">{{ item.username }}</td>
+                <td><span class="star-glyph" aria-hidden="true">★</span> {{ item.rating }}/5</td>
+                <td>{% include "partials/sentiment_badge.html" with analysis=item.analysis %}</td>
+                <td class="cell-muted">{{ item.created_at|date:"M j, H:i" }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="empty-inline">
+        <p>No feedback has been submitted yet.</p>
+        <a class="btn btn-ghost btn-sm" href="{% url 'movies:list' %}">Open the public catalogue</a>
+      </div>
+    {% endif %}
+  </section>
+
+  <aside class="staff-panel top-panel">
+    <div class="staff-panel-head">
+      <div>
+        <h2>Top rated</h2>
+        <p>By average audience rating.</p>
+      </div>
+    </div>
+
+    {% if top_movies %}
+      <ol class="ranked-list">
+        {% for movie in top_movies %}
+          <li>
+            <span class="rank">{{ forloop.counter|stringformat:"02d" }}</span>
+            <div class="ranked-main">
+              <a href="{{ movie.get_absolute_url }}">{{ movie.title }}</a>
+              <span>{{ movie.feedback_count }} review{{ movie.feedback_count|pluralize }}</span>
+            </div>
+            <span class="ranked-score">{{ movie.average_rating|floatformat:1 }}</span>
+          </li>
+        {% endfor %}
+      </ol>
+    {% else %}
+      <div class="empty-inline">
+        <p>Ratings will appear here once audiences respond.</p>
+      </div>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

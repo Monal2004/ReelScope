@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Explore movies — ReelScope{% endblock %}
+{% block meta_description %}Browse the ReelScope catalogue, see audience ratings and share your own take on any film.{% endblock %}
+{% block body_class %}page-movies{% endblock %}
+
+{% block content %}
+<section class="page-header">
+  <div class="shell">
+    <p class="eyebrow">The catalogue</p>
+    <h1>Find your next <span class="accent-word">story</span>.</h1>
+    <p class="page-lead">
+      Every film here is waiting for an audience verdict. Open a title to read
+      what people felt, or add your own rating in under a minute.
+    </p>
+  </div>
+</section>
+
+<section class="section section-tight">
+  <div class="shell">
+    <form class="filter-bar" method="get" role="search">
+      <div class="search-field">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
+        <label class="sr-only" for="movie-search">Search movies</label>
+        <input id="movie-search" type="search" name="q" value="{{ query }}" placeholder="Search by title, director or cast…">
+      </div>
+      {% if active_genre %}<input type="hidden" name="genre" value="{{ active_genre }}">{% endif %}
+      <button class="btn btn-gold" type="submit">Search</button>
+      {% if query or active_genre %}
+        <a class="btn btn-ghost" href="{% url 'movies:list' %}">Reset</a>
+      {% endif %}
+    </form>
+
+    <div class="genre-filters" aria-label="Filter by genre">
+      <a class="chip{% if not active_genre %} is-active{% endif %}" href="{% url 'movies:list' %}{% if query %}?q={{ query|urlencode }}{% endif %}">All genres</a>
+      {% for value, label in genres %}
+        <a class="chip{% if active_genre == value %} is-active{% endif %}"
+           href="?genre={{ value }}{% if query %}&amp;q={{ query|urlencode }}{% endif %}">{{ label }}</a>
+      {% endfor %}
+    </div>
+
+    <div class="results-meta">
+      <p>
+        {{ page_obj.paginator.count }} movie{{ page_obj.paginator.count|pluralize }}
+        {% if query %} matching &ldquo;{{ query }}&rdquo;{% endif %}
+      </p>
+    </div>
+
+    {% if movies %}
+      <div class="movie-grid">
+        {% for movie in movies %}
+          {% include "partials/movie_card.html" with movie=movie %}
+        {% endfor %}
+      </div>
+      {% include "partials/pagination.html" %}
+    {% else %}
+      <div class="empty-panel">
+        <span class="empty-icon" aria-hidden="true">◎</span>
+        <h2>No movies found</h2>
+        <p>Try a different title, director or genre.</p>
+        <a class="btn btn-ghost btn-sm" href="{% url 'movies:list' %}">Clear filters</a>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
