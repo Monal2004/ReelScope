@@ -14,6 +14,8 @@ from django.utils import timezone
 from feedback.models import Feedback, SentimentAnalysis
 from movies.models import Movie
 
+from . import ranking
+
 SENTIMENTS = ("positive", "neutral", "negative")
 SUCCESS = SentimentAnalysis.Status.SUCCESS
 

@@ -8,6 +8,7 @@ from analytics.services import (
     rating_breakdown,
     sentiment_breakdown,
 )
+from analytics.services.ranking import get_movie_ranking
 from feedback.models import Feedback
 
 from .forms import MovieForm
@@ -102,6 +103,7 @@ def movie_detail(request, slug):
             "rating_counts": rating_breakdown(feedback_queryset),
             "sentiment": sentiment_breakdown(feedback_queryset),
             "aspects": aspect_leaderboard(feedback_queryset),
+            "movie_ranking": get_movie_ranking(movie),
         },
     )
 

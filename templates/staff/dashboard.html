@@ -193,5 +193,120 @@
       </div>
     {% endif %}
   </aside>
+
+  <!-- Movie Ranking Section -->
+  <section class="staff-panel">
+    <div class="staff-panel-head">
+      <div>
+        <h2>Movie Ranking</h2>
+        <p>Audience appreciation score based on ratings, sentiment, and feedback volume.</p>
+      </div>
+    </div>
+
+    {% if ranked_movies %}
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th scope="col">Rank</th>
+              <th scope="col">Movie</th>
+              <th scope="col">Poster</th>
+              <th scope="col">Score</th>
+              <th scope="col">Avg Rating</th>
+              <th scope="col">Feedback</th>
+              <th scope="col">Positive %</th>
+              <th scope="col">Sentiment (Pos/Neu/Neg)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in ranked_movies %}
+              <tr>
+                <td><strong>{{ item.rank }}</strong></td>
+                <td class="cell-title">
+                  <a href="{{ item.movie.get_absolute_url }}">{{ item.movie.title }}</a>
+                </td>
+                <td class="cell-poster">
+                  {% if item.movie.poster %}
+                    <img src="{{ item.movie.poster.url }}" alt="Poster" width="30" height="45">
+                  {% else %}
+                    <span class="poster-placeholder">—</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if item.final_score is not None %}
+                    <strong>{{ item.final_score }}</strong>
+                  {% else %}
+                    <span class="muted">—</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if item.average_rating is not None %}
+                    {{ item.average_rating }} / 5
+                  {% else %}
+                    <span class="muted">—</span>
+                  {% endif %}
+                </td>
+                <td>{{ item.total_feedback }}</td>
+                <td>
+                  {% if item.positive_pct is not None %}
+                    {{ item.positive_pct }}%
+                  {% else %}
+                    <span class="muted">—</span>
+                  {% endif %}
+                </td>
+                <td class="cell-muted">
+                  {{ item.positive_feedback }} / {{ item.neutral_feedback }} / {{ item.negative_feedback }}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="empty-inline">
+        <p>No movies qualify for reliable ranking yet.</p>
+      </div>
+    {% endif %}
+
+    {% if insufficient_movies %}
+      <div class="staff-panel-head" style="margin-top: 2rem;">
+        <div>
+          <h3>Insufficient Data</h3>
+          <p>Movies with fewer than 5 feedback submissions or no analyzed sentiment.</p>
+        </div>
+      </div>
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th scope="col">Movie</th>
+              <th scope="col">Feedback</th>
+              <th scope="col">Avg Rating</th>
+              <th scope="col">Reason</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in insufficient_movies %}
+              <tr>
+                <td class="cell-title">
+                  <a href="{{ item.movie.get_absolute_url }}">{{ item.movie.title }}</a>
+                </td>
+                <td>{{ item.total_feedback }}</td>
+                <td>
+                  {% if item.average_rating is not None %}
+                    {{ item.average_rating }} / 5
+                  {% else %}
+                    <span class="muted">—</span>
+                  {% endif %}
+                </td>
+                <td class="cell-muted">{{ item.insufficient_reason }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endif %}
+  </section>
+
 </div>
 {% endblock %}

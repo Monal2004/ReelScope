@@ -3,12 +3,16 @@ from django.http import JsonResponse
 from django.shortcuts import render
 
 from . import services
+from .services import ranking
 
 
 @staff_member_required
 def dashboard(request):
-    """Staff overview: real totals, sentiment split, charts and recent feedback."""
-    return render(request, "staff/dashboard.html", services.dashboard_context())
+    """Staff overview: real totals, sentiment split, charts, and movie ranking."""
+    context = services.dashboard_context()
+    context["ranked_movies"] = ranking.get_ranked_movies(limit=10)
+    context["insufficient_movies"] = ranking.get_insufficient_data_movies(limit=10)
+    return render(request, "staff/dashboard.html", context)
 
 
 @staff_member_required

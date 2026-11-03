@@ -42,6 +42,15 @@
             </span>
             <span>{{ movie.feedback_count }} review{{ movie.feedback_count|pluralize }}</span>
           </div>
+          {% if movie_ranking and movie_ranking.ranking_available %}
+            <span class="badge badge-positive" style="margin-top: 0.5rem; display: inline-block;">
+              Rank #{{ movie_ranking.rank }} · Score {{ movie_ranking.final_score }}
+            </span>
+          {% elif movie_ranking and not movie_ranking.ranking_available %}
+            <span class="badge badge-neutral" style="margin-top: 0.5rem; display: inline-block; font-size: 0.7rem;">
+              Insufficient data for ranking
+            </span>
+          {% endif %}
         </div>
 
         <div class="detail-actions">
