@@ -1,0 +1,45 @@
+{% extends "staff/base_staff.html" %}
+
+{% block title %}Delete movie — ReelScope Staff{% endblock %}
+{% block staff_title %}Delete Movie{% endblock %}
+
+{% block staff_content %}
+<div class="staff-page-head">
+  <div>
+    <p class="eyebrow">Delete movie</p>
+    <h1>Delete "{{ movie.title }}"?</h1>
+    <p class="staff-lead">This cannot be undone. All associated feedback will also be removed.</p>
+  </div>
+  <div class="staff-page-meta">
+    <a class="btn btn-ghost" href="{% url 'movies_staff:movie_list_staff' %}">Back to catalogue</a>
+  </div>
+</div>
+
+<div class="staff-form">
+  <div class="panel panel-soft">
+    <div class="panel-heading">
+      <h2 class="aside-title">Movie details</h2>
+    </div>
+    <dl class="facts">
+      <div><dt>Title</dt><dd>{{ movie.title }}</dd></div>
+      <div><dt>Genre</dt><dd>{{ movie.get_genre_display }}</dd></div>
+      <div><dt>Director</dt><dd>{{ movie.director }}</dd></div>
+      <div><dt>Release date</dt><dd>{{ movie.release_date|date:"F j, Y" }}</dd></div>
+      <div><dt>Language</dt><dd>{{ movie.language }}</dd></div>
+      <div><dt>Status</dt><dd>{% if movie.is_published %}Published{% else %}Unpublished{% endif %}</dd></div>
+      <div><dt>Feedback submissions</dt><dd>{{ feedback_count }}</dd></div>
+    </dl>
+    <p class="form-alert" role="alert" style="margin-top: 1rem;">
+      Deleting this movie will also permanently delete all {{ feedback_count }} feedback submission{{ feedback_count|pluralize }} associated with it.
+    </p>
+  </div>
+
+  <form method="post" class="stack-form" novalidate>
+    {% csrf_token %}
+    <div class="form-actions">
+      <a class="btn btn-ghost" href="{% url 'movies_staff:movie_list_staff' %}">Cancel</a>
+      <button type="submit" class="btn btn-gold is-danger">Delete movie</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

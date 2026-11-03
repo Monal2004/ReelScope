@@ -1,0 +1,75 @@
+{% extends "staff/base_staff.html" %}
+
+{% block title %}Movie management — ReelScope Staff{% endblock %}
+{% block staff_title %}Movie Management{% endblock %}
+
+{% block staff_content %}
+<div class="staff-page-head">
+  <div>
+    <p class="eyebrow">Catalogue</p>
+    <h1>Manage movies</h1>
+    <p class="staff-lead">Add, edit, publish, or remove films from the catalogue.</p>
+  </div>
+  <div class="staff-page-meta">
+    <a class="btn btn-gold" href="{% url 'movies_staff:movie_add' %}">Add movie</a>
+  </div>
+</div>
+
+{% if movies %}
+  <div class="table-scroll">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th scope="col">Poster</th>
+          <th scope="col">Title</th>
+          <th scope="col">Genre</th>
+          <th scope="col">Release date</th>
+          <th scope="col">Status</th>
+          <th scope="col">Feedback</th>
+          <th scope="col">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for movie in movies %}
+          <tr>
+            <td class="cell-poster">
+              {% if movie.poster %}
+                <img src="{{ movie.poster.url }}" alt="Poster for {{ movie.title }}" width="40" height="60">
+              {% else %}
+                <span class="poster-placeholder">—</span>
+              {% endif %}
+            </td>
+            <td class="cell-title">
+              <a href="{{ movie.get_absolute_url }}">{{ movie.title }}</a>
+            </td>
+            <td class="cell-muted">{{ movie.get_genre_display }}</td>
+            <td class="cell-muted">{{ movie.release_date|date:"M j, Y" }}</td>
+            <td>
+              {% if movie.is_published %}
+                <span class="badge is-positive">Published</span>
+              {% else %}
+                <span class="badge is-negative">Unpublished</span>
+              {% endif %}
+            </td>
+            <td class="cell-muted">{{ movie.feedback.count }}</td>
+            <td class="cell-actions">
+              {% if movie.is_published %}
+                <a class="btn btn-ghost btn-sm" href="{% url 'movies_staff:movie_toggle_publish' movie.pk %}">Unpublish</a>
+              {% else %}
+                <a class="btn btn-ghost btn-sm" href="{% url 'movies_staff:movie_toggle_publish' movie.pk %}">Publish</a>
+              {% endif %}
+              <a class="btn btn-ghost btn-sm" href="{% url 'movies_staff:movie_edit' movie.pk %}">Edit</a>
+              <a class="btn btn-ghost btn-sm is-danger" href="{% url 'movies_staff:movie_delete' movie.pk %}">Delete</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <div class="empty-inline">
+    <p>No movies in the catalogue yet.</p>
+    <a class="btn btn-gold" href="{% url 'movies_staff:movie_add' %}">Add your first movie</a>
+  </div>
+{% endif %}
+{% endblock %}

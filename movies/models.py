@@ -35,6 +35,10 @@ class Movie(models.Model):
     director = models.CharField(max_length=150)
     cast = models.TextField(help_text="Comma-separated list of main actors.")
     language = models.CharField(max_length=50)
+    is_published = models.BooleanField(
+        default=False,
+        help_text="Only published movies are visible to public visitors.",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

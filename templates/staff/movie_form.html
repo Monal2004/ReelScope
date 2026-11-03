@@ -1,0 +1,96 @@
+{% extends "staff/base_staff.html" %}
+
+{% block title %}{{ action }} movie — ReelScope Staff{% endblock %}
+{% block staff_title %}{{ action }} Movie{% endblock %}
+
+{% block staff_content %}
+<div class="staff-page-head">
+  <div>
+    <p class="eyebrow">{{ action }} movie</p>
+    <h1>{{ movie.title|default:"New movie" }}</h1>
+    <p class="staff-lead">Enter the movie details. Unpublished movies stay hidden from public visitors.</p>
+  </div>
+  <div class="staff-page-meta">
+    <a class="btn btn-ghost" href="{% url 'movies_staff:movie_list_staff' %}">Back to catalogue</a>
+  </div>
+</div>
+
+<div class="staff-form">
+  <form method="post" enctype="multipart/form-data" class="stack-form" novalidate>
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <div class="form-alert" role="alert">
+        {{ form.non_field_errors }}
+      </div>
+    {% endif %}
+
+    <div class="form-grid">
+      <div class="field">
+        <label class="field-label" for="{{ form.title.id_for_label }}">{{ form.title.label }}</label>
+        {{ form.title }}
+        {{ form.title.errors }}
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="{{ form.genre.id_for_label }}">{{ form.genre.label }}</label>
+        {{ form.genre }}
+        {{ form.genre.errors }}
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="{{ form.release_date.id_for_label }}">{{ form.release_date.label }}</label>
+        {{ form.release_date }}
+        {{ form.release_date.errors }}
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="{{ form.director.id_for_label }}">{{ form.director.label }}</label>
+        {{ form.director }}
+        {{ form.director.errors }}
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="{{ form.language.id_for_label }}">{{ form.language.label }}</label>
+        {{ form.language }}
+        {{ form.language.errors }}
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="{{ form.cast.id_for_label }}">{{ form.cast.label }}</label>
+        {{ form.cast }}
+        {{ form.cast.errors }}
+      </div>
+
+      <div class="field field-full">
+        <label class="field-label" for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
+        {{ form.description }}
+        {{ form.description.errors }}
+      </div>
+
+      <div class="field field-full">
+        <label class="field-label" for="{{ form.poster.id_for_label }}">{{ form.poster.label }}</label>
+        {{ form.poster }}
+        {{ form.poster.errors }}
+        {% if movie and movie.poster %}
+          <p class="field-hint">Current poster: <a href="{{ movie.poster.url }}" target="_blank">View</a></p>
+        {% endif %}
+      </div>
+
+      <div class="field field-full">
+        <label class="field-checkbox">
+          {{ form.is_published }}
+          <span>{{ form.is_published.label }}</span>
+          <span class="field-hint">{{ form.is_published.help_text }}</span>
+        </label>
+        {{ form.is_published.errors }}
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <a class="btn btn-ghost" href="{% url 'movies_staff:movie_list_staff' %}">Cancel</a>
+      <button type="submit" class="btn btn-gold">{{ action }} movie</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

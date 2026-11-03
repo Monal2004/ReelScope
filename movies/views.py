@@ -1,6 +1,7 @@
+from django.contrib.admin.views.decorators import staff_member_required
 from django.core.paginator import Paginator
 from django.db.models import Avg, Count, Q
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 
 from analytics.services import (
     aspect_leaderboard,
@@ -9,13 +10,14 @@ from analytics.services import (
 )
 from feedback.models import Feedback
 
+from .forms import MovieForm
 from .models import Movie
 from .services import movie_cards
 
 
 def home(request):
     """Landing page: featured movie, newest releases and top-rated titles."""
-    movies = movie_cards()
+    movies = movie_cards().filter(is_published=True)
     featured = (
         movies.filter(feedback_count__gt=0)
         .order_by("-average_rating", "-feedback_count")
@@ -45,8 +47,8 @@ def home(request):
 
 
 def movie_list(request):
-    """Browse movies with search, genre filter and pagination."""
-    queryset = movie_cards().order_by("-created_at")
+    """Browse published movies with search, genre filter and pagination."""
+    queryset = movie_cards().filter(is_published=True).order_by("-created_at")
 
     query = (request.GET.get("q") or "").strip()
     genre = (request.GET.get("genre") or "").strip().lower()
@@ -85,7 +87,7 @@ def movie_list(request):
 
 def movie_detail(request, slug):
     """Public movie page with rating summary and recent audience feedback."""
-    movie = get_object_or_404(movie_cards(), slug=slug)
+    movie = get_object_or_404(movie_cards().filter(is_published=True), slug=slug)
     feedback_queryset = movie.feedback.select_related("analysis").order_by(
         "-created_at"
     )
@@ -102,3 +104,73 @@ def movie_detail(request, slug):
             "aspects": aspect_leaderboard(feedback_queryset),
         },
     )
+
+
+@staff_member_required
+def movie_list_staff(request):
+    """Staff view: list all movies with publish status."""
+    movies = Movie.objects.all().order_by("-created_at")
+    return render(
+        request,
+        "staff/movie_list.html",
+        {"movies": movies},
+    )
+
+
+@staff_member_required
+def movie_add(request):
+    """Staff view: add a new movie."""
+    if request.method == "POST":
+        form = MovieForm(request.POST, request.FILES)
+        if form.is_valid():
+            movie = form.save()
+            return redirect("movies_staff:movie_list_staff")
+    else:
+        form = MovieForm()
+    return render(
+        request,
+        "staff/movie_form.html",
+        {"form": form, "action": "Add"},
+    )
+
+
+@staff_member_required
+def movie_edit(request, pk):
+    """Staff view: edit an existing movie."""
+    movie = get_object_or_404(Movie, pk=pk)
+    if request.method == "POST":
+        form = MovieForm(request.POST, request.FILES, instance=movie)
+        if form.is_valid():
+            form.save()
+            return redirect("movies_staff:movie_list_staff")
+    else:
+        form = MovieForm(instance=movie)
+    return render(
+        request,
+        "staff/movie_form.html",
+        {"form": form, "movie": movie, "action": "Edit"},
+    )
+
+
+@staff_member_required
+def movie_delete(request, pk):
+    """Staff view: delete a movie with confirmation."""
+    movie = get_object_or_404(Movie, pk=pk)
+    feedback_count = movie.feedback.count()
+    if request.method == "POST":
+        movie.delete()
+        return redirect("movies_staff:movie_list_staff")
+    return render(
+        request,
+        "staff/movie_confirm_delete.html",
+        {"movie": movie, "feedback_count": feedback_count},
+    )
+
+
+@staff_member_required
+def movie_toggle_publish(request, pk):
+    """Staff view: toggle a movie's published status."""
+    movie = get_object_or_404(Movie, pk=pk)
+    movie.is_published = not movie.is_published
+    movie.save()
+    return redirect("movies_staff:movie_list_staff")
